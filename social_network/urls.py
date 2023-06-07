@@ -1,6 +1,6 @@
 from django.urls import path
 from social_network.views import PostList, PostRetrieveDestroy, LikeCreate, DislikeCreate, RegisterView, \
-    ProfileUserView, LikesAnalyticsAPIView, UserActivityView
+    ProfileUserView, LikesAnalyticsAPIView, UserActivityDetailView
 
 urlpatterns = [
     path('posts/', PostList.as_view()),
@@ -10,5 +10,5 @@ urlpatterns = [
     path('signup/', RegisterView.as_view()),
     path('profile/', ProfileUserView.as_view()),
     path('analytics/', LikesAnalyticsAPIView.as_view()),
-    path('user-activity/', UserActivityView.as_view()),
+    path('user-activity/<str:user__username>/', UserActivityDetailView.as_view()),
 ]

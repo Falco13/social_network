@@ -1,13 +1,11 @@
 from datetime import datetime
 
-from django.contrib.auth.models import AnonymousUser
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
 from rest_framework import generics, permissions, mixins, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
 from social_network.models import Post, Like, Dislike, UserActivity
@@ -80,7 +78,7 @@ class DislikeCreate(generics.CreateAPIView, mixins.DestroyModelMixin):
 
 
 class RegisterView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
     serializer_class = RegisterUserSerializer
 
     def post(self, request, *args, **kwargs):
@@ -94,7 +92,7 @@ class RegisterView(generics.GenericAPIView):
 
 
 class ProfileUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
 
     def get(self, request, *args, **kwargs):
@@ -104,7 +102,7 @@ class ProfileUserView(generics.GenericAPIView):
 
 
 class LikesAnalyticsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         date_from = request.query_params.get('date_from')
@@ -136,15 +134,8 @@ class LikesAnalyticsAPIView(APIView):
         return JsonResponse(analytics_data, safe=False)
 
 
-class UserActivityView(APIView):
-    def get(self, request):
-        if request.user.is_authenticated:
-            try:
-                activity = UserActivity.objects.get(user=request.user)
-                serializer = UserActivitySerializer(activity)
-                return Response(serializer.data)
-            except UserActivity.DoesNotExist:
-                return Response({'detail': 'User activity not found.'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'detail': 'Authentication credentials were not provided.'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+class UserActivityDetailView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = UserActivity.objects.all()
+    serializer_class = UserActivitySerializer
+    lookup_field = 'user__username'
