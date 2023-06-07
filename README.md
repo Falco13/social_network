@@ -10,9 +10,9 @@ __API end-points:__
 - token/refresh/
 - swagger/
 - api/posts/
-- api/posts/<pk>
-- api/posts/<pk>/like
-- api/posts/<pk>/dislike
+- api/posts/id
+- api/posts/id/like
+- api/posts/id/dislike
 - api/signup/
 - api/profile/
 - api/analytics/
