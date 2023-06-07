@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from social_network.models import Post, Like, Dislike, User
+from social_network.models import Post, Like, Dislike, User, UserActivity
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -65,3 +65,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
+    last_login = serializers.DateTimeField(source='user.last_login', format="%Y-%m-%d %H:%M:%S")
+    last_request = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+
+    class Meta:
+        model = UserActivity
+        fields = ['username', 'email', 'last_login', 'last_request']

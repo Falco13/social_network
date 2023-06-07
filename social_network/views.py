@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
@@ -9,9 +10,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
-from social_network.models import Post, Like, Dislike
+from social_network.models import Post, Like, Dislike, UserActivity
 from social_network.serializers import PostSerializer, LikeSerializer, DislikeSerializer, RegisterUserSerializer, \
-    UserSerializer
+    UserSerializer, UserActivitySerializer
 
 
 class PostList(generics.ListCreateAPIView):
@@ -133,3 +134,17 @@ class LikesAnalyticsAPIView(APIView):
         }
 
         return JsonResponse(analytics_data, safe=False)
+
+
+class UserActivityView(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            try:
+                activity = UserActivity.objects.get(user=request.user)
+                serializer = UserActivitySerializer(activity)
+                return Response(serializer.data)
+            except UserActivity.DoesNotExist:
+                return Response({'detail': 'User activity not found.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'detail': 'Authentication credentials were not provided.'},
+                            status=status.HTTP_401_UNAUTHORIZED)

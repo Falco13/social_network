@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -48,3 +49,12 @@ class Dislike(models.Model):
 
     class Meta:
         ordering = ['disliker']
+
+
+class UserActivity(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    last_request = models.DateTimeField(null=True, blank=True)
+
+    def update_last_request(self):
+        self.last_request = timezone.now()
+        self.save()
