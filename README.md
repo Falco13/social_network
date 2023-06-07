@@ -2,6 +2,10 @@
 # Django REST application Social Network
 
 - User model with usernamefield = email, and model Post which is always associated with the user.
+- Each user can create Posts, as well as delete only their own Posts.
+- Each user can Like and Dislike each Post, only 1 time, as well as remove their Like or Dislike.
+- An endpoint with user activity has been implemented, where you can see the last login of the user and the time of the last active action.
+- Implemented Registration for users, as well as endpoint Profile with information about the user.
 - Implement token authentication (JWT token)
 
 
