@@ -1,7 +1,14 @@
+from datetime import datetime
+
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from django.http import JsonResponse
 from rest_framework import generics, permissions, mixins, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
+
 from social_network.models import Post, Like, Dislike
 from social_network.serializers import PostSerializer, LikeSerializer, DislikeSerializer, RegisterUserSerializer, \
     UserSerializer
@@ -93,3 +100,36 @@ class ProfileUserView(generics.GenericAPIView):
         return Response({
             'user': UserSerializer(request.user, context=self.get_serializer_context()).data,
         })
+
+
+class LikesAnalyticsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+        except ValueError:
+            return JsonResponse({'error': 'Invalid date format. Please use YYYY-MM-DD.'}, status=400)
+
+        likes_analytics = Like.objects.filter(
+            created_at__date__range=(date_from, date_to)
+        ).annotate(
+            date=TruncDate('created_at')
+        ).values('date').annotate(count=Count('id')).order_by('date')
+
+        dislikes_analytics = Dislike.objects.filter(
+            created_at__date__range=(date_from, date_to)
+        ).annotate(
+            date=TruncDate('created_at')
+        ).values('date').annotate(count=Count('id')).order_by('date')
+
+        analytics_data = {
+            'likes': [{'date': item['date'], 'count': item['count']} for item in likes_analytics],
+            'dislikes': [{'date': item['date'], 'count': item['count']} for item in dislikes_analytics],
+        }
+
+        return JsonResponse(analytics_data, safe=False)
