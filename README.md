@@ -20,7 +20,7 @@ __API end-points:__
 - api/signup/
 - api/profile/
 - api/analytics/
-- api/user-activity/
+- api/user-activity/username
 
 
 __Used tools:__    
